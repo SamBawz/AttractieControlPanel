@@ -19,22 +19,13 @@ namespace AttractieCommunicatie
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            Acount a = new Acount("Admin", "123");
-            Acount b = new Acount("Admin2", "321");            
-
-            List<Acount> acounts = new List<Acount>();
-            acounts.Add(a);
-
-            foreach(Acount acount in acounts)
+            if(Account.LogIn(txtGebruikersnaam.Text, txtWachtwoord.Text))
             {
-                if (txtGebruikersnaam.Text == acount.Name && txtWachtwoord.Text == acount.Password) 
-                {
-                    openForm();
-                }
-                else
-                {
-                    MessageBox.Show("Gebruikersnaam of wachtwoord niet juist!");
-                }
+                openForm();
+            }
+            else
+            {
+                MessageBox.Show("Uw gebruikersnaam of wachtwoord is verkeerd.");
             }
         }
 
