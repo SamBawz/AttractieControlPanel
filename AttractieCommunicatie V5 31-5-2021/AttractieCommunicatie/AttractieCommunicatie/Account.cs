@@ -19,9 +19,9 @@ namespace AttractieCommunicatie
             this.Password = _password;
         } 
 
-        public static bool LogIn(string _name, string _password)
+        public static bool logIn(string _name, string _password)
         {
-            List<Account> accounts = Database.GetUsers();
+            List<Account> accounts = Database.getUsers();
 
             foreach (Account account in accounts)
             {

@@ -19,7 +19,7 @@ namespace AttractieCommunicatie
             connection.ConnectionString = connectionString;
         }*/
 
-        static internal bool OpenConnection()
+        static internal bool openConnection()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace AttractieCommunicatie
             }
         }
 
-        static internal bool CloseConnection()
+        static internal bool closeConnection()
         {
             try
             {
@@ -46,61 +46,40 @@ namespace AttractieCommunicatie
             }
         }
 
-        static public List<Account> GetUsers()
+        static public List<Account> getUsers()
         {
             string query = "SELECT * FROM solarcoasteruser";
-
-            //Create a list to store the result
             List<Account> accounts = new List<Account>();
-
-            //Open connection
-            if (OpenConnection() == true)
+            if (openConnection() == true)
             {
-                //Create Command
                 MySqlCommand cmd = new MySqlCommand(query, connection);
-                //Create a data reader and Execute the command
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
-                //Read the data and store them in the list
                 while (dataReader.Read())
                 {
-                    //Add every user to a user object that will be stored in the users list
                     Account account = new Account(Convert.ToInt32(dataReader.GetValue(0)), dataReader.GetValue(1).ToString(), dataReader.GetValue(2).ToString());
                     accounts.Add(account);
                 }
 
-                //close Data Reader
                 dataReader.Close();
-
-                //close Connection
-                CloseConnection();
-
-                //return list
+                closeConnection();
                 return accounts;
             }
             return accounts;
         }
 
-        static public bool UpdateDatabase(string _fieldName, int _value)
+        static public bool updateDatabase(string _fieldName, string _value)
         {
-            //password is hashed (sam)
             string query = "UPDATE solarcoasterstats SET " + _fieldName + " = '" + _value + "'";
-
-            //open connection
-            if (OpenConnection() == true)
+            if (openConnection() == true)
             {
-                //create command and assign the query and connection from the constructor
                 MySqlCommand cmd = new MySqlCommand(query, connection);
-
-                //Execute command
                 cmd.ExecuteNonQuery();
 
-                //close connection
-                CloseConnection();
+                closeConnection();
                 return true;
             }
             return false;
         }
-
     }
 }

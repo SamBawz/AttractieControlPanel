@@ -19,7 +19,7 @@ namespace AttractieCommunicatie
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            if(Account.LogIn(txtGebruikersnaam.Text, txtWachtwoord.Text))
+            if(Account.logIn(txtGebruikersnaam.Text, txtWachtwoord.Text))
             {
                 openForm();
             }

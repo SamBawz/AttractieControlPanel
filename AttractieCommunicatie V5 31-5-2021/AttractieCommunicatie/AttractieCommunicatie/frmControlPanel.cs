@@ -15,14 +15,14 @@ namespace AttractieCommunicatie
 {
     public partial class frmControlPanel : Form
     {
-        List<Port> ports = new List<Port>();
-        List<Config> configuration = new List<Config>();
+        //List<Port> ports = new List<Port>();
+        //List<Config> configuration = new List<Config>();
         System.Media.SoundPlayer snel = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Snel"]);
         System.Media.SoundPlayer start = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]);
         System.Media.SoundPlayer sneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
         System.Media.SoundPlayer turbo = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]);
         System.Media.SoundPlayer draaien = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]);
-        string arduinoSignal = "";
+        //string arduinoSignal = "";
         private decimal batterijPercentage;
 
         [Obsolete]
@@ -43,6 +43,10 @@ namespace AttractieCommunicatie
             lblPower.Text = "Power: ";
             btnPower.BackColor = Color.Red;
             btnReverse.BackColor = Color.Gray;
+            start.Stop();
+            snel.Stop();
+            sneller.Stop();
+            turbo.Stop();
         }
 
         //Hoe de control panel er uit hoort te zien na een poort opengezet wordt
@@ -50,10 +54,13 @@ namespace AttractieCommunicatie
         {
             toggleTimers(true);
             toggleEnabledControls(true);
-            trkbrSpeed.Value = findSelectedPortConfig().speed;
-            lblSpeed.Text = "Snelheid: " + findSelectedPortConfig().speed;
+            Arduino.speed = trkbrSpeed.Value;
+            lblSpeed.Text = "Snelheid: " + Arduino.speed;
+            //trkbrSpeed.Value = findSelectedPortConfig().speed;
+            //lblSpeed.Text = "Snelheid: " + findSelectedPortConfig().speed;
             btnPower.BackColor = Color.Green;
-            if (findSelectedPortConfig().reverse)
+            if (Arduino.reverse)
+            //if (findSelectedPortConfig().reverse)
             {
                 btnReverse.BackColor = Color.Green;
             }
@@ -63,23 +70,7 @@ namespace AttractieCommunicatie
             }
         }
 
-        /// <summary>
-        /// Stuurt een signaal naar de gekozen poort
-        /// </summary>
-        /// <param name="signal">Het bericht dat verstuurd dient te worden</param>
-        private void sendSignal(string signal)
-        {
-            //sendCommand
-            try
-            {
-                serialPortArduino.Write(signal);
-            }
-            catch (Exception ex)
-            {
-                closeControlPanel();
-                MessageBox.Show(ex.Message);
-            }
-        }
+        
 
         /// <summary>
         /// Enabled of disabled alle controls op de control panel
@@ -105,7 +96,7 @@ namespace AttractieCommunicatie
         }
 
         //Stuurt de configuratie klasse van de gebruikte poort terug
-        private Port findSelectedPortConfig()
+        /*private Port findSelectedPortConfig()
         {
             foreach (Port port in ports)
             {
@@ -115,7 +106,7 @@ namespace AttractieCommunicatie
                 }
             }
             return null;
-        }
+        }*/
 
         /// <summary>
         /// Zet de timers waarmee signalen ontvangen en verstuurd worden aan of uit
@@ -135,11 +126,11 @@ namespace AttractieCommunicatie
             cbPorts.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());
 
             //Maak voor elke poort een configuratie klasse waarin de instellingen opgeslagen worden
-            foreach (string port in System.IO.Ports.SerialPort.GetPortNames())
+            /*foreach (string port in System.IO.Ports.SerialPort.GetPortNames())
             {
                 Port _port = new Port(port, 2, false, 0);
                 ports.Add(_port);
-            }
+            }*/
 
             //Configureer de main poort instellingen
             serialPortArduino.BaudRate = (9600);
@@ -150,47 +141,50 @@ namespace AttractieCommunicatie
         private void cbPorts_SelectedIndexChanged(object sender, EventArgs e)
         {
             serialPortArduino.PortName = cbPorts.Text;
+            Config.usedPort = serialPortArduino;
         }
 
+        //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void serialPortArduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            //Command received
-            arduinoSignal = serialPortArduino.ReadLine();
+            if(Communication.recieveSignal().Length > 0)
+            {
+                lblPower.Text = "Power: " + Communication.recieveSignal() + "%";
+                //De arduino kan een opstart waarde sturen. In dit geval crasht te applicatie niet dankzij try { }
+                try
+                {
+                    pbPower.Value = Convert.ToInt32(Communication.recieveSignal());
+                }
+                catch { }
+            }
         }
 
         //Het sturen van signalen naar de arduino
         private void tmrSend_Tick(object sender, EventArgs e)
         {
             //Vraag de arduino om waardes terug te sturen (zoals de ldr waarde)
-            sendSignal("s");
+            Communication.sendSignal("send");
         }
 
-        //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void tmrRecieve_Tick(object sender, EventArgs e)
         {
-            if (serialPortArduino.IsOpen)
-            {
-                //De arduino stuurt signalen via println. Dit voegt een \r toe aan de string
-                arduinoSignal = arduinoSignal.Replace("\r", "");
-                lblPower.Text = "Power: " + arduinoSignal + "%";
-                //De arduino kan een verkeerde waarde sturen. In dit geval crasht te applicatie niet dankzij try { }
-                try
-                {
-                    if (arduinoSignal.Length > 0)
-                    {
-                        pbPower.Value = Convert.ToInt32(arduinoSignal);
-                    }
-                }
-                catch { }
-            }
         }
 
         private void btnPower_Click(object sender, EventArgs e)
         {
-            //Het bericht "p" voor power zet de attractie aan/uit
-            if (serialPortArduino.IsOpen)
+            if(Arduino.togglePower())
             {
-                sendSignal("p");
+                openControlPanel();
+            }
+            else
+            {
+                closeControlPanel();
+            }
+
+            //Het bericht "p" voor power zet de attractie aan/uit
+            /*if (serialPortArduino.IsOpen)
+            {
+                Arduino.sendSignal(serialPortArduino, "p");
                 serialPortArduino.Close();
                 closeControlPanel();
             }
@@ -201,7 +195,7 @@ namespace AttractieCommunicatie
                     serialPortArduino.Open();
                     if (serialPortArduino.IsOpen)
                     {
-                        sendSignal("p");
+                        Arduino.sendSignal(serialPortArduino, "p");
                         openControlPanel();
                     }
                 }
@@ -209,13 +203,14 @@ namespace AttractieCommunicatie
                 {
                     MessageBox.Show(ex.Message);
                 }
-            }
+            }*/
         }
     
         private void trkbrSpeed_Scroll(object sender, EventArgs e)
         {
-            findSelectedPortConfig().speed = trkbrSpeed.Value;
-            sendSignal(findSelectedPortConfig().speed.ToString());
+            Arduino.speed = trkbrSpeed.Value;
+            //findSelectedPortConfig().speed = trkbrSpeed.Value;
+            //Arduino.sendSignal(serialPortArduino, findSelectedPortConfig().speed.ToString());
             lblSpeed.Text = "Snelheid: " + trkbrSpeed.Value.ToString();
 
             if (trkbrSpeed.Value == 1)
@@ -240,17 +235,15 @@ namespace AttractieCommunicatie
         {
             draaien.Play();
 
-            if (findSelectedPortConfig().reverse)
+            if (Arduino.reverseAttraction())
             {
-                btnReverse.BackColor = Color.Red;
-                findSelectedPortConfig().reverse = false;
+                btnReverse.BackColor = Color.Green;
             }
             else
             {
-                btnReverse.BackColor = Color.Green;
-                findSelectedPortConfig().reverse = true;
+                btnReverse.BackColor = Color.Red;
             }
-            sendSignal(findSelectedPortConfig().reverse.ToString());
+            //Arduino.sendSignal(serialPortArduino, findSelectedPortConfig().reverse.ToString());
         }
         #endregion
 
@@ -302,10 +295,7 @@ namespace AttractieCommunicatie
             {
                 serialPortArduino.Close();
                 closeControlPanel();
-                start.Stop();
-                snel.Stop();
-                sneller.Stop();
-                turbo.Stop();
+                
             }
         }
         #endregion
