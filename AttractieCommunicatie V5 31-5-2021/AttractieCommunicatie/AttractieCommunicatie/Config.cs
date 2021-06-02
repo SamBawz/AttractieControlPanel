@@ -15,7 +15,7 @@ namespace AttractieCommunicatie
         {
             List<Port> ports = new List<Port>();
             foreach (string port in System.IO.Ports.SerialPort.GetPortNames())
-            {
+            { 
                 Port _port = new Port(port, 2, false, 0);
                 ports.Add(_port);
             }

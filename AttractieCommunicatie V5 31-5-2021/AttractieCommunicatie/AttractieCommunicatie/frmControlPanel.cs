@@ -264,7 +264,7 @@ namespace AttractieCommunicatie
             this.Close();
         }
 
-        #region Battery
+        #region Battery 
         private void tmrBattery_Tick(object sender, EventArgs e)
         {
             //Bekijkt the waarde van de scrollbar en aanpast int value.

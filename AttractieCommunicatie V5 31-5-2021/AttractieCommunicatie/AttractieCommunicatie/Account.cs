@@ -14,7 +14,7 @@ namespace AttractieCommunicatie
 
         public Account(int _id, string _name, string _password)
         {
-            this.Id = _id;
+            this.Id = _id; 
             this.Name = _name;
             this.Password = _password;
         } 

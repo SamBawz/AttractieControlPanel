@@ -21,7 +21,7 @@ namespace AttractieCommunicatie
 
         static internal bool openConnection()
         {
-            try
+            try 
             {
                 connection.ConnectionString = ConfigurationSettings.AppSettings["ConnectionString"];
                 connection.Open();

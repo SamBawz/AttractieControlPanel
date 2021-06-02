@@ -9,17 +9,29 @@ namespace AttractieCommunicatie
 {
     static class Arduino
     {   
-        public static int speed
+        public static bool power
         {
             get
+            {
+                return power;
+            }
+            set
+            {
+                Communication.sendSignal("power = " + value.ToString());
+                power = value;
+            }
+        }
+
+        public static int speed
+        {
+            get 
             {
                 return speed;
             }
             set
             {
                 Database.updateDatabase("speed", value.ToString());
-                //DIT GAAT LATER BEHANDELD WORDEN IN DE COMMUNICATIE KLASSE!!
-                sendSignal(Config.usedPort, value.ToString());
+                Communication.sendSignal("speed = " +  value.ToString());
                 speed = value;
             }
         }
@@ -32,18 +44,8 @@ namespace AttractieCommunicatie
             }
             set
             {
-                if (value == true)
-                {
-                    Database.updateDatabase("forward", "true");
-                }
-                else if (value == false)
-                {
-                    Database.updateDatabase("forward", "false");
-                }
-                
-                //DIT GAAT LATER BEHANDELD WORDEN IN DE COMMUNICATIE KLASSE!!
-                sendSignal(Config.usedPort, value.ToString());
-
+                Database.updateDatabase("forward", value.ToString());
+                Communication.sendSignal("reverse = " + value.ToString());
                 reverse = value;
             }
         }
@@ -56,28 +58,28 @@ namespace AttractieCommunicatie
             }
             set
             {
-                Database.updateDatabase("light", ldrValue);
+                Database.updateDatabase("light", ldrValue.ToString());
                 ldrValue = value;
             }
         }
 
 
-        public static bool togglePower(SerialPort port)
+        public static bool togglePower()
         {
-            if(port.IsOpen)
+            if(Config.usedPort.IsOpen)
             {
-                Arduino.sendSignal(port, "p");
-                port.Close();
+                power = false;
+                Config.usedPort.Close();
                 return false;
             }
             else
             {
                 try
                 {
-                    port.Open();
-                    if (port.IsOpen)
+                    Config.usedPort.Open();
+                    if (Config.usedPort.IsOpen)
                     {
-                        Arduino.sendSignal(port, "p");
+                        power = true;
                         return true;
                     }
                 }
@@ -88,35 +90,20 @@ namespace AttractieCommunicatie
             }
         }
 
-        /// <summary>
-        /// Stuurt een signaal naar de gekozen poort
-        /// </summary>
-        /// /// <param name="port">De poort waar het bericht naar verstuurd wordt</param>
-        /// <param name="signal">Het bericht dat verstuurd dient te worden</param>
-        public static bool sendSignal(string signal)
+        public static bool reverseAttraction()
         {
-            //sendCommand
-            try
+            if (reverse)
             {
-                Config.usedPort.Write(signal);
-                return true;
-            }
-            catch (Exception ex)
-            {
+                reverse = false;
                 return false;
+            }
+            else
+            {
+                reverse = true;
+                return true;
             }
         }
 
-        public static string recieveSignal()
-        {
-            if (Config.usedPort.IsOpen)
-            {
-                string arduinoSignal = Config.usedPort.ReadLine();
-                //De arduino stuurt signalen via println. Dit voegt een \r toe aan de string
-                arduinoSignal = arduinoSignal.Replace("\r", "");
-                return arduinoSignal; 
-            }
-            return "";
-        }
+
     }
 }
