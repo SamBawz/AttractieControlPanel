@@ -22,6 +22,7 @@ namespace AttractieCommunicatie
         System.Media.SoundPlayer sneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
         System.Media.SoundPlayer turbo = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]);
         System.Media.SoundPlayer draaien = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]);
+
         //string arduinoSignal = "";
         private decimal batterijPercentage;
 
@@ -54,11 +55,11 @@ namespace AttractieCommunicatie
         {
             toggleTimers(true);
             toggleEnabledControls(true);
-            Arduino.speed = trkbrSpeed.Value;
+            btnPower.BackColor = Color.Green;
+            /*trkbrSpeed.Value = Arduino.speed;
             lblSpeed.Text = "Snelheid: " + Arduino.speed;
             //trkbrSpeed.Value = findSelectedPortConfig().speed;
             //lblSpeed.Text = "Snelheid: " + findSelectedPortConfig().speed;
-            btnPower.BackColor = Color.Green;
             if (Arduino.reverse)
             //if (findSelectedPortConfig().reverse)
             {
@@ -67,7 +68,7 @@ namespace AttractieCommunicatie
             else
             {
                 btnReverse.BackColor = Color.Red;
-            }
+            }*/
         }
 
         
@@ -116,6 +117,7 @@ namespace AttractieCommunicatie
         {
             tmrSend.Enabled = enable;
             tmrRecieve.Enabled = enable;
+            tmrUpdateGUI.Enabled = enable;
         }
         #endregion
 
@@ -147,15 +149,23 @@ namespace AttractieCommunicatie
         //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void serialPortArduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if(Communication.recieveSignal().Length > 0)
+            /*if(Communication.recieveSignal())
             {
-                lblPower.Text = "Power: " + Communication.recieveSignal() + "%";
+
+                lblPower.Text = "Power: " + Communication.signal + "%";
                 //De arduino kan een opstart waarde sturen. In dit geval crasht te applicatie niet dankzij try { }
                 try
                 {
-                    pbPower.Value = Convert.ToInt32(Communication.recieveSignal());
+                    pbPower.Value = Convert.ToInt32(Communication.signal);
                 }
                 catch { }
+            }*/
+
+            if (!Communication.recieveSignal())
+            {
+
+
+                //ERROR HANDLING KOMT NOG
             }
         }
 
@@ -168,6 +178,29 @@ namespace AttractieCommunicatie
 
         private void tmrRecieve_Tick(object sender, EventArgs e)
         {
+        }
+
+        private void tmrUpdateGUI_Tick(object sender, EventArgs e)
+        {
+            //Power
+            lblPower.Text = Arduino.ldrValue.ToString();
+            pbPower.Text = Arduino.ldrValue.ToString();
+
+            //Speed
+            trkbrSpeed.Value = Arduino.speed;
+            lblSpeed.Text = "Snelheid: " + Arduino.speed;
+
+            //Reverse
+            if (Arduino.reverse)
+            {
+                btnReverse.BackColor = Color.Green;
+            }
+            else
+            {
+                btnReverse.BackColor = Color.Red;
+            }
+
+            //Battery
         }
 
         private void btnPower_Click(object sender, EventArgs e)
