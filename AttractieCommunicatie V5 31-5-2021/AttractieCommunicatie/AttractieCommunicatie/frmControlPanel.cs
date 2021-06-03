@@ -15,16 +15,13 @@ namespace AttractieCommunicatie
 {
     public partial class frmControlPanel : Form
     {
-        //List<Port> ports = new List<Port>();
-        //List<Config> configuration = new List<Config>();
         System.Media.SoundPlayer snel = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Snel"]);
         System.Media.SoundPlayer start = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]);
         System.Media.SoundPlayer sneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
         System.Media.SoundPlayer turbo = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]);
         System.Media.SoundPlayer draaien = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]);
 
-        //string arduinoSignal = "";
-        private decimal batterijPercentage;
+        bool controlPanelStatus = false;
 
         [Obsolete]
         public frmControlPanel()
@@ -36,42 +33,44 @@ namespace AttractieCommunicatie
         //Reset de control panel naar hoe het uitzag voordat er een poort opengezet werd
         public void closeControlPanel()
         {
-            toggleTimers(false);
-            toggleEnabledControls(false);
-            trkbrSpeed.Value = 2;
-            pbPower.Value = 0;
-            lblSpeed.Text = "Snelheid: 2";
-            lblPower.Text = "Power: ";
-            btnPower.BackColor = Color.Red;
-            btnReverse.BackColor = Color.Gray;
-            start.Stop();
-            snel.Stop();
-            sneller.Stop();
-            turbo.Stop();
+            if (controlPanelStatus)
+            {
+                controlPanelStatus = false;
+                toggleTimers(false);
+                toggleEnabledControls(false);
+                btnPower.BackColor = Color.Red;
+
+                pbPower.Value = 0;
+                lblPower.Text = "Power: 0";
+
+                trkbrSpeed.Value = 0;
+                lblSpeed.Text = "Snelheid: 0";
+
+                btnReverse.BackColor = Color.Gray;
+
+                start.Stop();
+                snel.Stop();
+                sneller.Stop();
+                turbo.Stop();
+            }
         }
 
         //Hoe de control panel er uit hoort te zien na een poort opengezet wordt
         public void openControlPanel()
         {
-            toggleTimers(true);
-            toggleEnabledControls(true);
-            btnPower.BackColor = Color.Green;
-            /*trkbrSpeed.Value = Arduino.speed;
-            lblSpeed.Text = "Snelheid: " + Arduino.speed;
-            //trkbrSpeed.Value = findSelectedPortConfig().speed;
-            //lblSpeed.Text = "Snelheid: " + findSelectedPortConfig().speed;
-            if (Arduino.reverse)
-            //if (findSelectedPortConfig().reverse)
+            if (!controlPanelStatus)
             {
-                btnReverse.BackColor = Color.Green;
-            }
-            else
-            {
-                btnReverse.BackColor = Color.Red;
-            }*/
-        }
+                controlPanelStatus = true;
+                toggleTimers(true);
+                toggleEnabledControls(true);
+                btnPower.BackColor = Color.Green;
 
-        
+                if (Arduino.battery < 1)
+                {
+                    Arduino.battery = 10m;
+                }
+            }    
+        }
 
         /// <summary>
         /// Enabled of disabled alle controls op de control panel
@@ -81,33 +80,24 @@ namespace AttractieCommunicatie
         {
             foreach (Control control in this.Controls)
             {
-                control.Enabled = enabled;
+                //Uitzonderingen
+                if (control.Name == btnPower.Name || control.Name == btnTerug.Name || control.Name == cbPorts.Name) { }
+                else if (control.Enabled != enabled)
+                {
+                    control.Enabled = enabled;
+                }
             }
 
-            //uitzonderingen
-            btnPower.Enabled = true;
-            if (enabled)
+            //cbPorts wilt het tegenovergestelde van de parameter aanhouden
+            if (Arduino.power && !enabled)
             {
                 cbPorts.Enabled = false;
             }
-            else
+            else if (!Arduino.power && enabled)
             {
                 cbPorts.Enabled = true;
             }        
         }
-
-        //Stuurt de configuratie klasse van de gebruikte poort terug
-        /*private Port findSelectedPortConfig()
-        {
-            foreach (Port port in ports)
-            {
-                if (port.portName == serialPortArduino.PortName)
-                {
-                    return port;
-                }
-            }
-            return null;
-        }*/
 
         /// <summary>
         /// Zet de timers waarmee signalen ontvangen en verstuurd worden aan of uit
@@ -116,8 +106,7 @@ namespace AttractieCommunicatie
         private void toggleTimers(bool enable)
         {
             tmrSend.Enabled = enable;
-            tmrRecieve.Enabled = enable;
-            tmrUpdateGUI.Enabled = enable;
+            tmrBattery.Enabled = enable;
         }
         #endregion
 
@@ -127,13 +116,6 @@ namespace AttractieCommunicatie
             //Laad alle open poorten in een combobox
             cbPorts.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());
 
-            //Maak voor elke poort een configuratie klasse waarin de instellingen opgeslagen worden
-            /*foreach (string port in System.IO.Ports.SerialPort.GetPortNames())
-            {
-                Port _port = new Port(port, 2, false, 0);
-                ports.Add(_port);
-            }*/
-
             //Configureer de main poort instellingen
             serialPortArduino.BaudRate = (9600);
             serialPortArduino.ReadTimeout = (2000);
@@ -142,6 +124,7 @@ namespace AttractieCommunicatie
 
         private void cbPorts_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //Update de main poort zodra de gebruiker een andere poort selecteerd
             serialPortArduino.PortName = cbPorts.Text;
             Config.MainPort = serialPortArduino;
         }
@@ -149,24 +132,10 @@ namespace AttractieCommunicatie
         //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void serialPortArduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            /*if(Communication.recieveSignal())
-            {
-
-                lblPower.Text = "Power: " + Communication.signal + "%";
-                //De arduino kan een opstart waarde sturen. In dit geval crasht te applicatie niet dankzij try { }
-                try
-                {
-                    pbPower.Value = Convert.ToInt32(Communication.signal);
-                }
-                catch { }
-            }*/
-
             if (!Communication.recieveSignal())
             {
-                //ERROR HANDLING
-                MessageBox.Show("GEEN ACKS >:(");
+                MessageBox.Show("Er is iets mis met de verbinding.");
                 Arduino.togglePower();
-                closeControlPanel();
             }
         }
 
@@ -177,77 +146,47 @@ namespace AttractieCommunicatie
             Communication.sendSignal("send");
         }
 
-        private void tmrRecieve_Tick(object sender, EventArgs e)
-        {
-        }
-
         private void tmrUpdateGUI_Tick(object sender, EventArgs e)
         {
-            //Power
-            lblPower.Text = Arduino.ldrValue.ToString();
-            pbPower.Text = Arduino.ldrValue.ToString();
-
-            //Speed
-            trkbrSpeed.Value = Arduino.speed;
-            lblSpeed.Text = "Snelheid: " + Arduino.speed;
-
-            //Reverse
-            if (Arduino.reverse)
+            if (!Arduino.power)
             {
-                btnReverse.BackColor = Color.Green;
+                closeControlPanel();
             }
-            else
+            else if (Arduino.power)
             {
-                btnReverse.BackColor = Color.Red;
-            }
+                openControlPanel();
 
-            //Battery
+                //Update de GUI
+                lblPower.Text = "Power: " + Arduino.ldrValue.ToString();
+                pbPower.Value = Arduino.ldrValue;
+
+                trkbrSpeed.Value = Arduino.speed;
+                lblSpeed.Text = "Snelheid: " + Arduino.speed;
+
+                if (Arduino.reverse)
+                {
+                    btnReverse.BackColor = Color.Green;
+                }
+                else
+                {
+                    btnReverse.BackColor = Color.Red;
+                }
+
+                lblBattery.Text = Convert.ToInt32(Arduino.battery).ToString();
+                pbBattery.Value = Convert.ToInt32(Arduino.battery);
+            }
         }
 
         private void btnPower_Click(object sender, EventArgs e)
         {
-            if(Arduino.togglePower())
-            {
-                openControlPanel();
-            }
-            else
-            {
-                closeControlPanel();
-            }
-
-            //Het bericht "p" voor power zet de attractie aan/uit
-            /*if (serialPortArduino.IsOpen)
-            {
-                Arduino.sendSignal(serialPortArduino, "p");
-                serialPortArduino.Close();
-                closeControlPanel();
-            }
-            else
-            {
-                try
-                {
-                    serialPortArduino.Open();
-                    if (serialPortArduino.IsOpen)
-                    {
-                        Arduino.sendSignal(serialPortArduino, "p");
-                        openControlPanel();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            }*/
+            Arduino.togglePower();
         }
     
         private void trkbrSpeed_Scroll(object sender, EventArgs e)
         {
             Arduino.speed = trkbrSpeed.Value;
-            //findSelectedPortConfig().speed = trkbrSpeed.Value;
-            //Arduino.sendSignal(serialPortArduino, findSelectedPortConfig().speed.ToString());
-            lblSpeed.Text = "Snelheid: " + trkbrSpeed.Value.ToString();
-
-            if (trkbrSpeed.Value == 1)
+            
+            /*if (trkbrSpeed.Value == 1)
             {
                 start.Play();
             }
@@ -262,12 +201,12 @@ namespace AttractieCommunicatie
             else if (trkbrSpeed.Value == 4)
             {
                 turbo.Play();
-            }
+            }*/
         }
 
         private void btnReverse_Click(object sender, EventArgs e)
         {
-            draaien.Play();
+            //draaien.Play();
 
             if (Arduino.reverseAttraction())
             {
@@ -277,7 +216,6 @@ namespace AttractieCommunicatie
             {
                 btnReverse.BackColor = Color.Red;
             }
-            //Arduino.sendSignal(serialPortArduino, findSelectedPortConfig().reverse.ToString());
         }
         #endregion
 
@@ -301,36 +239,7 @@ namespace AttractieCommunicatie
         #region Battery 
         private void tmrBattery_Tick(object sender, EventArgs e)
         {
-            //Bekijkt the waarde van de scrollbar en aanpast int value.
-            if (serialPortArduino.IsOpen)
-            {
-                lblBatterij.Text = Convert.ToInt32(batterijPercentage).ToString();
-                pbBatterij.Value = Convert.ToInt32(batterijPercentage);
-
-                switch(trkbrSpeed.Value)
-                {
-                    case 1:
-                        batterijPercentage += .1m;
-                        break;
-                    case 2:
-                        batterijPercentage += .05m;
-                        break;
-                    case 3:
-                        batterijPercentage -= .03m;
-                        break;
-                    case 4:
-                        batterijPercentage -= .05m;
-                        break;
-                }
-            }
-            
-            //In geval van batterijen leeg alles uit.
-            if (batterijPercentage <= -0.1m)
-            {
-                serialPortArduino.Close();
-                closeControlPanel();
-                
-            }
+            Arduino.calculatePower();
         }
         #endregion
     }

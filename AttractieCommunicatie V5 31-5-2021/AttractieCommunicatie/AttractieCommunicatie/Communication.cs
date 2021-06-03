@@ -17,8 +17,8 @@ namespace AttractieCommunicatie
             try
             {
                 //BELANGRIJK: DE SIGNALEN BEGINNEN MET EEN AANDUIDING VOOR WAT ER INGESTELD DIENT TE WORDEN (eg: speed = 3). DIT MOET DUS VERWERKT WORDEN NAAR EEN STRING VAN CHAR SIGNALEN.
-                //De volgende signalen kunnen verstuurd worden; 'speed=0/1/2/3/4', 'power=true/false', 'reverse=true/false' en 'send'
-                Config.usedPort.Write("#" + _signal + "%");
+                //De volgende signalen kunnen verstuurd worden; 'speed=0/1/2/3/4', 'power=True/False', 'reverse=True/False' en 'send'
+                Config.MainPort.Write("#" + _signal + "%");
                 return true;
             }
             catch (Exception ex)
@@ -29,13 +29,13 @@ namespace AttractieCommunicatie
 
         public static bool recieveSignal()
         {
-            if (Config.usedPort.IsOpen)
+            if (Config.MainPort.IsOpen)
             {
-                string arduinoSignal = Config.usedPort.ReadLine();
+                string arduinoSignal = Config.MainPort.ReadLine();
                 //De arduino stuurt signalen via println. Dit voegt een \r toe aan de string
                 arduinoSignal = arduinoSignal.Replace("\r", "");
 
-                if (arduinoSignal == "NACK")
+                if (arduinoSignal == "NACK" || arduinoSignal == null)
                 {
                     NACKnumber++;
                     if (NACKnumber > 3)
@@ -58,6 +58,7 @@ namespace AttractieCommunicatie
                     try
                     {
                         Arduino.ldrValue = Convert.ToInt32(arduinoSignal);
+                        return true;
                     }
                     catch { }
                 }

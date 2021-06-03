@@ -39,8 +39,8 @@ namespace AttractieCommunicatie
             }
             catch (Exception ex)
             {
-                return false;
             }
+            return false;
         }
     }
 }

@@ -68,9 +68,8 @@ namespace AttractieCommunicatie
             return accounts;
         }
 
-        static public bool updateDatabase(string _fieldName, string _value)
+        static public bool updateDatabase(string query)
         {
-            string query = "UPDATE solarcoasterstats SET " + _fieldName + " = '" + _value + "'";
             if (openConnection() == true)
             {
                 MySqlCommand cmd = new MySqlCommand(query, connection);

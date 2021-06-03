@@ -8,17 +8,24 @@ using System.IO.Ports;
 namespace AttractieCommunicatie
 {
     static class Arduino
-    {   
+    {
+        //Fields to save settings after setting properties. Setting a property from within the same property causes a loop.
+        private static bool _power = false;
+        private static int _speed = 0;
+        private static bool _reverse = false;
+        private static int _ldrValue;
+        private static decimal _battery = 10;
+
         public static bool power
         {
             get
             {
-                return power;
+                return _power;
             }
             set
             {
-                Communication.sendSignal("power=" + value.ToString());
-                power = value;
+                _power = value;
+                Communication.sendSignal("power=" + _power.ToString());
             }
         }
 
@@ -26,13 +33,13 @@ namespace AttractieCommunicatie
         {
             get 
             {
-                return speed;
+                return _speed;
             }
             set
             {
-                Database.updateDatabase("speed", value.ToString());
-                Communication.sendSignal("speed=" +  value.ToString());
-                speed = value;
+                _speed = value;
+                Database.updateDatabase("UPDATE solarcoasterstats SET speed = '" + _speed.ToString() + "'");
+                Communication.sendSignal("speed=" + _speed.ToString());
             }
         }
 
@@ -40,13 +47,18 @@ namespace AttractieCommunicatie
         {
             get
             {
-                return reverse;
+                return _reverse;
             }
             set
             {
-                Database.updateDatabase("forward", value.ToString());
-                Communication.sendSignal("reverse=" + value.ToString());
-                reverse = value;
+                _reverse = value;
+                if (_reverse)
+                {
+                    Database.updateDatabase("UPDATE solarcoasterstats SET forward = '" + 1 + "'");
+                }
+                else {
+                    Database.updateDatabase("UPDATE solarcoasterstats SET forward = '" + 0 + "'");
+                }
             }
         }
 
@@ -54,12 +66,25 @@ namespace AttractieCommunicatie
         {
             get
             {
-                return ldrValue;
+                return _ldrValue;
             }
             set
             {
-                Database.updateDatabase("light", ldrValue.ToString());
-                ldrValue = value;
+                _ldrValue = value;
+                Database.updateDatabase("UPDATE solarcoasterstats SET light = '" + _ldrValue + "'");
+            }
+        }
+
+        public static decimal battery
+        {
+            get
+            {
+                return _battery;
+            }
+            set
+            {
+                _battery = value;
+                //Database.updateDatabase("UPDATE solarcoasterstats SET light = '" + _ldrValue + "'");
             }
         }
 
@@ -106,6 +131,36 @@ namespace AttractieCommunicatie
             }
         }
 
+        public static decimal calculatePower()
+        {
+            decimal loss = 0m;
+            decimal gain = ldrValue * .01m;
 
+            switch (Arduino.speed)
+            {
+                case 1:
+                    loss = .00m;
+                    break;
+                case 2:
+                    loss = .4m;
+                    break;
+                case 3:
+                    loss = .8m;
+                    break;
+                case 4:
+                    loss = 1.2m;
+                    break;
+            }
+
+            Arduino.battery = Arduino.battery + gain - loss;
+
+            //In geval van batterijen leeg alles uit.
+            if (Arduino.battery <= -0.1m)
+            {
+                Arduino.togglePower();
+            }
+
+            return Arduino.battery;
+        }
     }
 }
