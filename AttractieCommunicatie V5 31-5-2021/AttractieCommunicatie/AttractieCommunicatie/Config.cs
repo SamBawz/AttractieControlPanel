@@ -9,7 +9,7 @@ namespace AttractieCommunicatie
 {
     class Config
     {
-        public static SerialPort usedPort { get; set; }
+        public static SerialPort MainPort { get; set; }
 
         public List<Port> getPorts()
         {
@@ -20,6 +20,27 @@ namespace AttractieCommunicatie
                 ports.Add(_port);
             }
             return ports;
+        }
+
+        public static void closeMainPort()
+        {
+            MainPort.Close();
+        }
+
+        public static bool openMainPort()
+        {
+            try
+            {
+                MainPort.Open();
+                if (MainPort.IsOpen)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

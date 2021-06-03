@@ -143,7 +143,7 @@ namespace AttractieCommunicatie
         private void cbPorts_SelectedIndexChanged(object sender, EventArgs e)
         {
             serialPortArduino.PortName = cbPorts.Text;
-            Config.usedPort = serialPortArduino;
+            Config.MainPort = serialPortArduino;
         }
 
         //Het verwerken van de signalen die de applicatie ontvangt van de arduino
@@ -163,9 +163,10 @@ namespace AttractieCommunicatie
 
             if (!Communication.recieveSignal())
             {
-
-
-                //ERROR HANDLING KOMT NOG
+                //ERROR HANDLING
+                MessageBox.Show("GEEN ACKS >:(");
+                Arduino.togglePower();
+                closeControlPanel();
             }
         }
 

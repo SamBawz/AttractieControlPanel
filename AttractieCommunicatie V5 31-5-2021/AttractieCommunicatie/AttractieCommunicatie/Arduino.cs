@@ -66,20 +66,19 @@ namespace AttractieCommunicatie
 
         public static bool togglePower()
         {
-            if (Config.usedPort != null)
+            if (Config.MainPort != null)
             {
-                if (Config.usedPort.IsOpen)
+                if (Config.MainPort.IsOpen)
                 {
                     power = false;
-                    Config.usedPort.Close();
+                    Config.closeMainPort();
                     return false;
                 }
                 else
                 {
                     try
                     {
-                        Config.usedPort.Open();
-                        if (Config.usedPort.IsOpen)
+                        if (Config.openMainPort())
                         {
                             power = true;
                             return true;
@@ -88,7 +87,6 @@ namespace AttractieCommunicatie
                     catch (Exception ex)
                     {
                     }
-                    return false;
                 }
             }
             return false;
