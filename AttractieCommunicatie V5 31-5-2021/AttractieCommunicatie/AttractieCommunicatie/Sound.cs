@@ -15,6 +15,19 @@ namespace AttractieCommunicatie
         public string Turbo { get; set; }
         public string Draaien { get; set; }
 
+
+        //System.Media.SoundPlayer aSneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
+        //static System.Media.SoundPlayer aStart = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]);
+        static List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>()
+        {
+            new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]),
+            new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Snel"]),
+            new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]),
+            new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]),
+            new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]),
+        };
+
+
         public Sound(string _start, string _snel, string _sneller, string _turbo, string _draaien)
         {
             this.Start = _start;
@@ -26,72 +39,70 @@ namespace AttractieCommunicatie
 
         public static bool aStart()
         {
-            System.Media.SoundPlayer aStart = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]);
-            List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>();
-
-            sounds.Add(aStart);
-
             foreach (System.Media.SoundPlayer sound in sounds)
             {
-                aStart.Play();
+                if (sound.SoundLocation == ConfigurationSettings.AppSettings["Start"])
+                {
+                    sound.Play();
+                }
             }
             return false;
         }
 
         public static bool aSnel()
         {
-            System.Media.SoundPlayer aSnel = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Snel"]);
-            List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>();
-
-            sounds.Add(aSnel);
-
             foreach (System.Media.SoundPlayer sound in sounds)
             {
-                aSnel.Play();
+                if (sound.SoundLocation == ConfigurationSettings.AppSettings["Snel"])
+                {
+                    sound.Play();
+                }
             }
             return false;
         }
 
         public static bool aSneller()
         {
-            System.Media.SoundPlayer aSneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
-            List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>();
-
-            sounds.Add(aSneller);
-
             foreach (System.Media.SoundPlayer sound in sounds)
             {
-                aSneller.Play();
+                if (sound.SoundLocation == ConfigurationSettings.AppSettings["Sneller"])
+                {
+                    sound.Play();
+                }
             }
             return false;
         }
 
         public static bool aTurbo()
         {
-            System.Media.SoundPlayer aTurbo = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]);
-            List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>();
-
-            sounds.Add(aTurbo);
-
             foreach (System.Media.SoundPlayer sound in sounds)
             {
-                aTurbo.Play();
+                if (sound.SoundLocation == ConfigurationSettings.AppSettings["Turbo"])
+                {
+                    sound.Play();
+                }
             }
             return false;
         }
 
         public static bool aDraaien()
         {
-            System.Media.SoundPlayer aDraaien = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]);
-            List<System.Media.SoundPlayer> sounds = new List<System.Media.SoundPlayer>();
-
-            sounds.Add(aDraaien);
-
             foreach (System.Media.SoundPlayer sound in sounds)
             {
-                aDraaien.Play();
+                if (sound.SoundLocation == ConfigurationSettings.AppSettings["Draaien"])
+                {
+                    sound.Play();
+                }
             }
             return false;
+        }
+
+        public static void aStopAll()
+        {
+            foreach (System.Media.SoundPlayer sound in sounds)
+            {
+                sound.Stop();
+            }
         }
     }
 }
