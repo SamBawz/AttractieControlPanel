@@ -130,7 +130,7 @@
             // 
             // tmrSend
             // 
-            this.tmrSend.Interval = 500;
+            this.tmrSend.Interval = 750;
             this.tmrSend.Tick += new System.EventHandler(this.tmrSend_Tick);
             // 
             // lblPower
@@ -140,9 +140,9 @@
             this.lblPower.Enabled = false;
             this.lblPower.Location = new System.Drawing.Point(259, 118);
             this.lblPower.Name = "lblPower";
-            this.lblPower.Size = new System.Drawing.Size(51, 17);
+            this.lblPower.Size = new System.Drawing.Size(63, 17);
             this.lblPower.TabIndex = 9;
-            this.lblPower.Text = "Power:";
+            this.lblPower.Text = "Power: 0";
             // 
             // pbPower
             // 
@@ -219,11 +219,12 @@
             // 
             this.lblBattery.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblBattery.AutoSize = true;
-            this.lblBattery.Location = new System.Drawing.Point(776, 352);
+            this.lblBattery.Enabled = false;
+            this.lblBattery.Location = new System.Drawing.Point(504, 353);
             this.lblBattery.Name = "lblBattery";
-            this.lblBattery.Size = new System.Drawing.Size(52, 17);
+            this.lblBattery.Size = new System.Drawing.Size(68, 17);
             this.lblBattery.TabIndex = 18;
-            this.lblBattery.Text = "Batterij";
+            this.lblBattery.Text = "Batterij: 0";
             // 
             // tmrBattery
             // 
@@ -233,6 +234,7 @@
             // tmrUpdateGUI
             // 
             this.tmrUpdateGUI.Enabled = true;
+            this.tmrUpdateGUI.Interval = 50;
             this.tmrUpdateGUI.Tick += new System.EventHandler(this.tmrUpdateGUI_Tick);
             // 
             // frmControlPanel

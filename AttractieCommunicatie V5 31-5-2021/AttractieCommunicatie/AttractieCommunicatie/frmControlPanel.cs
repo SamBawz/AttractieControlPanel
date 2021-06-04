@@ -42,6 +42,9 @@ namespace AttractieCommunicatie
 
                 btnReverse.BackColor = Color.Gray;
 
+                pbBattery.Value = 0;
+                lblBattery.Text = "Batterij: 0";
+
                 Sound.aStopAll();
             }
         }
@@ -104,6 +107,13 @@ namespace AttractieCommunicatie
         #region Events
         private void frmControlPanel_Load(object sender, EventArgs e)
         {
+            //Onthoud de geselecteerde port wanneer de gebruiker uitlogt en inlogt
+            if (Config.MainPort != null)
+            {
+                cbPorts.Text = Config.MainPort.PortName;
+            }
+            
+
             //Laad alle open poorten in een combobox
             cbPorts.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());
 
@@ -125,8 +135,8 @@ namespace AttractieCommunicatie
         {
             if (!Communication.recieveSignal())
             {
+                Arduino.power = false;
                 MessageBox.Show("Er is iets mis met de verbinding.");
-                Arduino.togglePower();
             }
         }
 
@@ -134,7 +144,11 @@ namespace AttractieCommunicatie
         private void tmrSend_Tick(object sender, EventArgs e)
         {
             //Vraag de arduino om waardes terug te sturen (zoals de ldr waarde)
-            Communication.sendSignal("send");
+            if(!Communication.sendSignal("send"))
+            {
+                Arduino.power = false;
+                MessageBox.Show("De verbinding is verbroken.");
+            }
         }
 
         private void tmrUpdateGUI_Tick(object sender, EventArgs e)
@@ -163,7 +177,7 @@ namespace AttractieCommunicatie
                     btnReverse.BackColor = Color.Red;
                 }
 
-                lblBattery.Text = Convert.ToInt32(Arduino.battery).ToString();
+                lblBattery.Text = "Batterij: " + Convert.ToInt32(Arduino.battery).ToString();
                 pbBattery.Value = Convert.ToInt32(Arduino.battery);
             }
         }
@@ -220,13 +234,14 @@ namespace AttractieCommunicatie
 
         private void btnTerug_Click(object sender, EventArgs e)
         {
+            Arduino.power = false;
             this.Close();
         }
 
         #region Battery 
         private void tmrBattery_Tick(object sender, EventArgs e)
         {
-            Arduino.calculatePower();
+            Arduino.calculateBatteryLevel();
         }
         #endregion
 

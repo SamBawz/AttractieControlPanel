@@ -11,10 +11,10 @@ namespace AttractieCommunicatie
     {
         //Fields to save settings after setting properties. Setting a property from within the same property causes a loop.
         private static bool _power = false;
-        private static int _speed = 0;
-        private static bool _reverse = false;
+        private static int _speed;
+        private static bool _reverse;
         private static int _ldrValue;
-        private static decimal _battery = 10;
+        private static decimal _battery;
 
         public static bool power
         {
@@ -24,7 +24,20 @@ namespace AttractieCommunicatie
             }
             set
             {
+                Arduino.speed = 0;
+                Arduino.reverse = false;
+                Arduino.ldrValue = 0;
+                Arduino.battery = 10;
+
                 _power = value;
+                if (_power)
+                {
+                    Database.updateDatabase("UPDATE solarcoasterstats SET power = '" + 1 + "'");
+                }
+                else
+                {
+                    Database.updateDatabase("UPDATE solarcoasterstats SET power = '" + 0 + "'");
+                }
                 Communication.sendSignal("power=" + _power.ToString());
             }
         }
@@ -71,7 +84,7 @@ namespace AttractieCommunicatie
             set
             {
                 _ldrValue = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET light = '" + _ldrValue + "'");
+                Database.updateDatabase("UPDATE solarcoasterstats SET ldr = '" + _ldrValue + "'");
             }
         }
 
@@ -84,7 +97,7 @@ namespace AttractieCommunicatie
             set
             {
                 _battery = value;
-                //Database.updateDatabase("UPDATE solarcoasterstats SET light = '" + _ldrValue + "'");
+                Database.updateDatabase("UPDATE solarcoasterstats SET battery = '" + _battery + "'");
             }
         }
 
@@ -131,7 +144,7 @@ namespace AttractieCommunicatie
             }
         }
 
-        public static decimal calculatePower()
+        public static decimal calculateBatteryLevel()
         {
             decimal loss = 0m;
             decimal gain = ldrValue * .01m;
