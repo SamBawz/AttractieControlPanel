@@ -9,16 +9,10 @@ namespace AttractieCommunicatie
     class Port
     {
         public string portName { get; set; }
-        public int speed { get; set; }
-        public bool reverse { get; set; }
-        public int ldrValue { get; set; }
 
-        public Port(string name, int speed, bool reverse, int ldrvalue)
+        public Port(string name)
         {
             this.portName = name;
-            this.speed = speed;
-            this.reverse = reverse;
-            this.ldrValue = ldrvalue;
         }
     }
 }

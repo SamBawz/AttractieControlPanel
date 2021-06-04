@@ -40,7 +40,7 @@
             this.tmrSend = new System.Windows.Forms.Timer(this.components);
             this.lblPower = new System.Windows.Forms.Label();
             this.pbPower = new System.Windows.Forms.ProgressBar();
-            this.btnSnel = new System.Windows.Forms.Button();
+            this.btnStop = new System.Windows.Forms.Button();
             this.btnStart = new System.Windows.Forms.Button();
             this.grpbxSoundboard = new System.Windows.Forms.GroupBox();
             this.btnTerug = new System.Windows.Forms.Button();
@@ -154,17 +154,17 @@
             this.pbPower.Size = new System.Drawing.Size(149, 23);
             this.pbPower.TabIndex = 10;
             // 
-            // btnSnel
+            // btnStop
             // 
-            this.btnSnel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSnel.Location = new System.Drawing.Point(15, 21);
-            this.btnSnel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnSnel.Name = "btnSnel";
-            this.btnSnel.Size = new System.Drawing.Size(57, 58);
-            this.btnSnel.TabIndex = 11;
-            this.btnSnel.Text = "Snel";
-            this.btnSnel.UseVisualStyleBackColor = true;
-            this.btnSnel.Click += new System.EventHandler(this.btnSnel_Click);
+            this.btnStop.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnStop.Location = new System.Drawing.Point(15, 21);
+            this.btnStop.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(57, 58);
+            this.btnStop.TabIndex = 11;
+            this.btnStop.Text = "Stop";
+            this.btnStop.UseVisualStyleBackColor = true;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
             // 
             // btnStart
             // 
@@ -181,7 +181,7 @@
             // grpbxSoundboard
             // 
             this.grpbxSoundboard.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.grpbxSoundboard.Controls.Add(this.btnSnel);
+            this.grpbxSoundboard.Controls.Add(this.btnStop);
             this.grpbxSoundboard.Controls.Add(this.btnStart);
             this.grpbxSoundboard.Enabled = false;
             this.grpbxSoundboard.Location = new System.Drawing.Point(261, 302);
@@ -276,7 +276,7 @@
         private System.Windows.Forms.Timer tmrSend;
         private System.Windows.Forms.Label lblPower;
         private System.Windows.Forms.ProgressBar pbPower;
-        private System.Windows.Forms.Button btnSnel;
+        private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.GroupBox grpbxSoundboard;
         private System.Windows.Forms.Button btnTerug;

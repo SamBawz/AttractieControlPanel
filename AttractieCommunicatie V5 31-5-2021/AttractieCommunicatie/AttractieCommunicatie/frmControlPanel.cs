@@ -15,12 +15,6 @@ namespace AttractieCommunicatie
 {
     public partial class frmControlPanel : Form
     {
-        System.Media.SoundPlayer snel = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Snel"]);
-        System.Media.SoundPlayer start = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Start"]);
-        System.Media.SoundPlayer sneller = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Sneller"]);
-        System.Media.SoundPlayer turbo = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Turbo"]);
-        System.Media.SoundPlayer draaien = new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]);
-
         bool controlPanelStatus = false;
 
         [Obsolete]
@@ -48,10 +42,7 @@ namespace AttractieCommunicatie
 
                 btnReverse.BackColor = Color.Gray;
 
-                start.Stop();
-                snel.Stop();
-                sneller.Stop();
-                turbo.Stop();
+                Sound.aStopAll();
             }
         }
 
@@ -186,27 +177,23 @@ namespace AttractieCommunicatie
         {
             Arduino.speed = trkbrSpeed.Value;
             
-            /*if (trkbrSpeed.Value == 1)
+            if (trkbrSpeed.Value == 2)
             {
-                start.Play();
-            }
-            else if (trkbrSpeed.Value == 2)
-            {
-                snel.Play();
+                Sound.aSnel();
             }
             else if (trkbrSpeed.Value == 3)
             {
-                sneller.Play();
+                Sound.aSneller();
             }
             else if (trkbrSpeed.Value == 4)
             {
-                turbo.Play();
-            }*/
+                Sound.aTurbo();
+            }
         }
 
         private void btnReverse_Click(object sender, EventArgs e)
         {
-            //draaien.Play();
+            Sound.aDraaien();
 
             if (Arduino.reverseAttraction())
             {
@@ -220,14 +207,14 @@ namespace AttractieCommunicatie
         #endregion
 
         #region Audio
-        private void btnSnel_Click(object sender, EventArgs e)
-        {
-            snel.Play();
-        }
-
         private void btnStart_Click(object sender, EventArgs e)
         {
-            start.Play();
+            Sound.aStart();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            Sound.aStopAll();
         }
         #endregion
 
@@ -242,5 +229,6 @@ namespace AttractieCommunicatie
             Arduino.calculatePower();
         }
         #endregion
+
     }
 }
