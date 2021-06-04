@@ -11,6 +11,7 @@ namespace AttractieCommunicatie
     {
         public static SerialPort MainPort { get; set; }
 
+        //Wordt op dit moment niet gebruikt
         public List<Port> getPorts()
         {
             List<Port> ports = new List<Port>();

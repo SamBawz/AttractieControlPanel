@@ -107,13 +107,6 @@ namespace AttractieCommunicatie
         #region Events
         private void frmControlPanel_Load(object sender, EventArgs e)
         {
-            //Onthoud de geselecteerde port wanneer de gebruiker uitlogt en inlogt
-            if (Config.MainPort != null)
-            {
-                cbPorts.Text = Config.MainPort.PortName;
-            }
-            
-
             //Laad alle open poorten in een combobox
             cbPorts.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());
 
@@ -121,6 +114,8 @@ namespace AttractieCommunicatie
             serialPortArduino.BaudRate = (9600);
             serialPortArduino.ReadTimeout = (2000);
             serialPortArduino.WriteTimeout = (2000);
+
+            Config.MainPort = serialPortArduino;
         }
 
         private void cbPorts_SelectedIndexChanged(object sender, EventArgs e)
@@ -133,7 +128,7 @@ namespace AttractieCommunicatie
         //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void serialPortArduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (!Communication.recieveSignal())
+            if (!Communication.recieveSignal() && Arduino.power)
             {
                 Arduino.power = false;
                 MessageBox.Show("Er is iets mis met de verbinding.");
@@ -144,7 +139,7 @@ namespace AttractieCommunicatie
         private void tmrSend_Tick(object sender, EventArgs e)
         {
             //Vraag de arduino om waardes terug te sturen (zoals de ldr waarde)
-            if(!Communication.sendSignal("send"))
+            if(!Communication.sendSignal("send") && Arduino.power)
             {
                 Arduino.power = false;
                 MessageBox.Show("De verbinding is verbroken.");

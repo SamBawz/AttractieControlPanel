@@ -130,7 +130,7 @@
             // 
             // tmrSend
             // 
-            this.tmrSend.Interval = 750;
+            this.tmrSend.Interval = 1000;
             this.tmrSend.Tick += new System.EventHandler(this.tmrSend_Tick);
             // 
             // lblPower
@@ -234,7 +234,6 @@
             // tmrUpdateGUI
             // 
             this.tmrUpdateGUI.Enabled = true;
-            this.tmrUpdateGUI.Interval = 50;
             this.tmrUpdateGUI.Tick += new System.EventHandler(this.tmrUpdateGUI_Tick);
             // 
             // frmControlPanel

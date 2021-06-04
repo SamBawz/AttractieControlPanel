@@ -80,5 +80,26 @@ namespace AttractieCommunicatie
             }
             return false;
         }
+
+        static public decimal getBatteryLevel()
+        {
+            decimal battery = 0;
+            string query = "SELECT battery FROM solarcoasterstats";
+            if (openConnection() == true)
+            {
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    battery = Convert.ToInt16(dataReader.GetValue(0));
+                }
+
+                dataReader.Close();
+                closeConnection();
+                return battery;
+            }
+            return battery;
+        }
     }
 }

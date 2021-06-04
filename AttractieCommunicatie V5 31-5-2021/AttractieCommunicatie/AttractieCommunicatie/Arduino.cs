@@ -14,7 +14,7 @@ namespace AttractieCommunicatie
         private static int _speed;
         private static bool _reverse;
         private static int _ldrValue;
-        private static decimal _battery;
+        private static decimal _battery = Database.getBatteryLevel();
 
         public static bool power
         {
@@ -27,7 +27,6 @@ namespace AttractieCommunicatie
                 Arduino.speed = 0;
                 Arduino.reverse = false;
                 Arduino.ldrValue = 0;
-                Arduino.battery = 10;
 
                 _power = value;
                 if (_power)
@@ -38,7 +37,7 @@ namespace AttractieCommunicatie
                 {
                     Database.updateDatabase("UPDATE solarcoasterstats SET power = '" + 0 + "'");
                 }
-                Communication.sendSignal("power=" + _power.ToString());
+                Communication.sendSignal("power=" + value.ToString());
             }
         }
 
@@ -51,8 +50,8 @@ namespace AttractieCommunicatie
             set
             {
                 _speed = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET speed = '" + _speed.ToString() + "'");
-                Communication.sendSignal("speed=" + _speed.ToString());
+                Database.updateDatabase("UPDATE solarcoasterstats SET speed = '" + value.ToString() + "'");
+                Communication.sendSignal("speed=" + value.ToString());
             }
         }
 
@@ -84,7 +83,7 @@ namespace AttractieCommunicatie
             set
             {
                 _ldrValue = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET ldr = '" + _ldrValue + "'");
+                Database.updateDatabase("UPDATE solarcoasterstats SET ldr = '" + value + "'");
             }
         }
 
@@ -97,7 +96,7 @@ namespace AttractieCommunicatie
             set
             {
                 _battery = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET battery = '" + _battery + "'");
+                Database.updateDatabase("UPDATE solarcoasterstats SET battery = '" + value + "'");
             }
         }
 
@@ -148,6 +147,7 @@ namespace AttractieCommunicatie
         {
             decimal loss = 0m;
             decimal gain = ldrValue * .01m;
+            decimal batteryLevel = 0;
 
             switch (Arduino.speed)
             {
@@ -165,12 +165,20 @@ namespace AttractieCommunicatie
                     break;
             }
 
-            Arduino.battery = Arduino.battery + gain - loss;
+            batteryLevel = Arduino.battery + gain - loss;
 
-            //In geval van batterijen leeg alles uit.
-            if (Arduino.battery <= -0.1m)
+            if (batteryLevel <= -0.1m)
             {
+                Arduino.battery = 1;
                 Arduino.togglePower();
+            }
+            else if (batteryLevel > 100)
+            {
+                Arduino.battery = 100;
+            }
+            else
+            {
+                Arduino.battery = batteryLevel;
             }
 
             return Arduino.battery;
