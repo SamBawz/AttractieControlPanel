@@ -19,7 +19,11 @@ namespace AttractieCommunicatie
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            if(Account.logIn(txtGebruikersnaam.Text, txtWachtwoord.Text))
+            if(!Database.testConnection())
+            {
+                MessageBox.Show("Kan niet verbinden met de database.");
+            }
+            else if(Account.authenticate(txtGebruikersnaam.Text, txtWachtwoord.Text))
             {
                 openForm();
             }

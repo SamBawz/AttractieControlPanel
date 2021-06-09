@@ -15,7 +15,7 @@ namespace AttractieCommunicatie
 {
     public partial class frmControlPanel : Form
     {
-        bool controlPanelStatus = false;
+        bool recieveSignals = false;
 
         [Obsolete]
         public frmControlPanel()
@@ -24,14 +24,23 @@ namespace AttractieCommunicatie
         }
 
         #region Functies
-        //Reset de control panel naar hoe het uitzag voordat er een poort opengezet werd
-        public void closeControlPanel()
+        private void updateGUI()
         {
-            if (controlPanelStatus)
+            //Enable/disable controls
+            foreach (Control control in this.Controls)
             {
-                controlPanelStatus = false;
-                toggleTimers(false);
-                toggleEnabledControls(false);
+                //Uitzonderingen
+                if (control == btnPower || control == btnTerug || control == cbPorts || control == lblUser) { }
+                else if (control.Enabled != Arduino.power)
+                {
+                    control.Enabled = Arduino.power;
+                }
+            }
+
+            //Update element values
+            if (!Arduino.power)
+            {
+                cbPorts.Enabled = true;
                 btnPower.BackColor = Color.Red;
 
                 pbPower.Value = 0;
@@ -46,67 +55,50 @@ namespace AttractieCommunicatie
                 lblBattery.Text = "Batterij: 0";
 
                 Sound.aStopAll();
+
             }
-        }
-
-        //Hoe de control panel er uit hoort te zien na een poort opengezet wordt
-        public void openControlPanel()
-        {
-            if (!controlPanelStatus)
-            {
-                controlPanelStatus = true;
-                toggleTimers(true);
-                toggleEnabledControls(true);
-                btnPower.BackColor = Color.Green;
-
-                if (Arduino.battery < 1)
-                {
-                    Arduino.battery = 10m;
-                }
-            }    
-        }
-
-        /// <summary>
-        /// Enabled of disabled alle controls op de control panel
-        /// </summary>
-        /// <param name="enabled">true = enable, false = disable</param>
-        private void toggleEnabledControls(bool enabled)
-        {
-            foreach (Control control in this.Controls)
-            {
-                //Uitzonderingen
-                if (control.Name == btnPower.Name || control.Name == btnTerug.Name || control.Name == cbPorts.Name) { }
-                else if (control.Enabled != enabled)
-                {
-                    control.Enabled = enabled;
-                }
-            }
-
-            //cbPorts wilt het tegenovergestelde van de parameter aanhouden
-            if (Arduino.power && !enabled)
+            else if (Arduino.power)
             {
                 cbPorts.Enabled = false;
+                btnPower.BackColor = Color.Green;
+
+                //Update de GUI
+                lblPower.Text = "Power: " + Arduino.ldrValue.ToString();
+                pbPower.Value = Arduino.ldrValue;
+
+                trkbrSpeed.Value = Arduino.speed;
+                lblSpeed.Text = "Snelheid: " + Arduino.speed;
+
+                if (Arduino.reverse)
+                {
+                    btnReverse.BackColor = Color.Green;
+                }
+                else
+                {
+                    btnReverse.BackColor = Color.Red;
+                }
+
+                lblBattery.Text = "Batterij: " + Convert.ToInt32(Arduino.battery).ToString();
+                pbBattery.Value = Convert.ToInt32(Arduino.battery);
             }
-            else if (!Arduino.power && enabled)
-            {
-                cbPorts.Enabled = true;
-            }        
         }
 
-        /// <summary>
-        /// Zet de timers waarmee signalen ontvangen en verstuurd worden aan of uit
-        /// </summary> 
-        /// <param name="enable">true = aan, false = uit</param>
-        private void toggleTimers(bool enable)
+        private void testConnection()
         {
-            tmrSend.Enabled = enable;
-            tmrBattery.Enabled = enable;
+            if(!Database.testConnection())
+            {
+                Arduino.power = false;
+                this.Close();
+            }
         }
         #endregion
 
         #region Events
         private void frmControlPanel_Load(object sender, EventArgs e)
         {
+            lblUser.Text = Account.getCurrentUser();
+            Database.closeConnection();
+
             //Laad alle open poorten in een combobox
             cbPorts.Items.AddRange(System.IO.Ports.SerialPort.GetPortNames());
 
@@ -128,52 +120,36 @@ namespace AttractieCommunicatie
         //Het verwerken van de signalen die de applicatie ontvangt van de arduino
         private void serialPortArduino_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (!Communication.recieveSignal() && Arduino.power)
+            if (!Communication.recieveSignal() && recieveSignals)
             {
                 Arduino.power = false;
                 MessageBox.Show("Er is iets mis met de verbinding.");
             }
         }
 
-        //Het sturen van signalen naar de arduino
-        private void tmrSend_Tick(object sender, EventArgs e)
+        private void sendSignals()
         {
             //Vraag de arduino om waardes terug te sturen (zoals de ldr waarde)
-            if(!Communication.sendSignal("send") && Arduino.power)
+            if (!Communication.sendSignal("send"))
             {
                 Arduino.power = false;
                 MessageBox.Show("De verbinding is verbroken.");
             }
         }
 
-        private void tmrUpdateGUI_Tick(object sender, EventArgs e)
+        private void tmrUpdate_Tick(object sender, EventArgs e)
         {
-            if (!Arduino.power)
+            testConnection();
+            updateGUI();
+            if (Arduino.power)
             {
-                closeControlPanel();
+                recieveSignals = true;
+                sendSignals();
+                Arduino.calculateBatteryLevel();
             }
-            else if (Arduino.power)
+            else
             {
-                openControlPanel();
-
-                //Update de GUI
-                lblPower.Text = "Power: " + Arduino.ldrValue.ToString();
-                pbPower.Value = Arduino.ldrValue;
-
-                trkbrSpeed.Value = Arduino.speed;
-                lblSpeed.Text = "Snelheid: " + Arduino.speed;
-
-                if (Arduino.reverse)
-                {
-                    btnReverse.BackColor = Color.Green;
-                }
-                else
-                {
-                    btnReverse.BackColor = Color.Red;
-                }
-
-                lblBattery.Text = "Batterij: " + Convert.ToInt32(Arduino.battery).ToString();
-                pbBattery.Value = Convert.ToInt32(Arduino.battery);
+                recieveSignals = false;
             }
         }
 
@@ -232,13 +208,5 @@ namespace AttractieCommunicatie
             Arduino.power = false;
             this.Close();
         }
-
-        #region Battery 
-        private void tmrBattery_Tick(object sender, EventArgs e)
-        {
-            Arduino.calculateBatteryLevel();
-        }
-        #endregion
-
     }
 }

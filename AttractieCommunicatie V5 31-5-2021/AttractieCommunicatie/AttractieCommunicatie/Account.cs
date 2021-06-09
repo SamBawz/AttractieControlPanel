@@ -8,9 +8,10 @@ namespace AttractieCommunicatie
 {
     class Account
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
+        private int Id { get; set; }
+        private string Name { get; set; }
+        private string Password { get; set; }
+        private static string currentUser;
 
         public Account(int _id, string _name, string _password)
         {
@@ -19,18 +20,30 @@ namespace AttractieCommunicatie
             this.Password = _password;
         } 
 
-        public static bool logIn(string _name, string _password)
+        public static bool authenticate(string _name, string _password)
         {
+            bool returnValue = false;
             List<Account> accounts = Database.getUsers();
 
             foreach (Account account in accounts)
             {
                 if (_name == account.Name && _password == account.Password)
                 {
-                    return true;
+                    returnValue = true;
+                    Account.currentUser = account.ToString();
                 }
             }
-            return false;
+            return returnValue;
+        }
+
+        public static string getCurrentUser()
+        {
+            return Account.currentUser;
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }

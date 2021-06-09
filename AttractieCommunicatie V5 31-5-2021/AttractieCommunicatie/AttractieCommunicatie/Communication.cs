@@ -8,8 +8,12 @@ namespace AttractieCommunicatie
 {
     static class Communication
     {
-        internal static int NACKnumber = 0;
+        internal static int NumberOfRetries = 0;
         internal static string signal { get; set; }
+
+        //Maak variabele startchar, eindchar en magic nummer aan
+        //Geen return in het midden van een functie
+        //Timeout tijd toevoegen
 
         public static bool sendSignal(string _signal)
         {
@@ -40,8 +44,8 @@ namespace AttractieCommunicatie
 
                 if (arduinoSignal == "NACK" || arduinoSignal == null)
                 {
-                    NACKnumber++;
-                    if (NACKnumber > 3)
+                    NumberOfRetries++;
+                    if (NumberOfRetries > 3)
                     {
                         return false;
                     }
@@ -50,7 +54,7 @@ namespace AttractieCommunicatie
                 }
                 else if (arduinoSignal == "ACK")
                 {
-                    NACKnumber = 0;
+                    NumberOfRetries = 0;
                     return true;
                 }
 

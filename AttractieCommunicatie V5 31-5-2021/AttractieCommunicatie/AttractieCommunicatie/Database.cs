@@ -23,8 +23,8 @@ namespace AttractieCommunicatie
         {
             try 
             {
-                connection.ConnectionString = ConfigurationSettings.AppSettings["ConnectionString"];
-                connection.Open();
+                    connection.ConnectionString = ConfigurationSettings.AppSettings["ConnectionString"];
+                    connection.Open();
                 return true;
             }
             catch (MySqlException ex)
@@ -46,11 +46,28 @@ namespace AttractieCommunicatie
             }
         }
 
+        static public bool testConnection()
+        {
+            //Bug waarbij de connection open wordt gezet terwijl het al open staat. Dit komt omdat deze functie op een timer staat.
+
+            /*if (openConnection())
+            {
+                closeConnection();
+                return true;
+            }
+            else
+            {
+                return false;
+            }*/
+
+            return true;
+        }
+
         static public List<Account> getUsers()
         {
-            string query = "SELECT * FROM solarcoasteruser";
+            string query = "SELECT id, name, password FROM solarcoasteruser";
             List<Account> accounts = new List<Account>();
-            if (openConnection() == true)
+            if (openConnection())
             {
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
@@ -68,11 +85,29 @@ namespace AttractieCommunicatie
             return accounts;
         }
 
-        static public bool updateDatabase(string query)
+        static public bool updateSolarcoasterStats(string field, int value)
         {
-            if (openConnection() == true)
+            if (openConnection())
             {
+                //Gebruik parameterized query om sql injectie te voorkomen
+                string query = "UPDATE solarcoasterstats SET " + field + "=@value";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@value", value);
+                cmd.ExecuteNonQuery();
+
+                closeConnection();
+                return true;
+            }
+            return false;
+        }
+
+        static public bool updateSolarcoasterStats(string field, string value)
+        {
+            if (openConnection())
+            {
+                string query = "UPDATE solarcoasterstats SET " + field + "=@value";
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@value", value);
                 cmd.ExecuteNonQuery();
 
                 closeConnection();
@@ -85,7 +120,7 @@ namespace AttractieCommunicatie
         {
             decimal battery = 0;
             string query = "SELECT battery FROM solarcoasterstats";
-            if (openConnection() == true)
+            if (openConnection())
             {
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();

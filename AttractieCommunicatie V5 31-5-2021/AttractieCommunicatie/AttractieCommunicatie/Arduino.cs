@@ -31,11 +31,11 @@ namespace AttractieCommunicatie
                 _power = value;
                 if (_power)
                 {
-                    Database.updateDatabase("UPDATE solarcoasterstats SET power = '" + 1 + "'");
+                    Database.updateSolarcoasterStats("Power", 1);
                 }
                 else
                 {
-                    Database.updateDatabase("UPDATE solarcoasterstats SET power = '" + 0 + "'");
+                    Database.updateSolarcoasterStats("Power", 0);
                 }
                 Communication.sendSignal("power=" + value.ToString());
             }
@@ -50,7 +50,7 @@ namespace AttractieCommunicatie
             set
             {
                 _speed = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET speed = '" + value.ToString() + "'");
+                Database.updateSolarcoasterStats("speed", value);
                 Communication.sendSignal("speed=" + value.ToString());
             }
         }
@@ -66,11 +66,12 @@ namespace AttractieCommunicatie
                 _reverse = value;
                 if (_reverse)
                 {
-                    Database.updateDatabase("UPDATE solarcoasterstats SET forward = '" + 1 + "'");
+                    Database.updateSolarcoasterStats("forward", 1);
                 }
                 else {
-                    Database.updateDatabase("UPDATE solarcoasterstats SET forward = '" + 0 + "'");
+                    Database.updateSolarcoasterStats("forward", 0);
                 }
+                Communication.sendSignal("reverse=" + value.ToString());
             }
         }
 
@@ -83,7 +84,7 @@ namespace AttractieCommunicatie
             set
             {
                 _ldrValue = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET ldr = '" + value + "'");
+                Database.updateSolarcoasterStats("ldr", value);
             }
         }
 
@@ -96,7 +97,7 @@ namespace AttractieCommunicatie
             set
             {
                 _battery = value;
-                Database.updateDatabase("UPDATE solarcoasterstats SET battery = '" + value + "'");
+                Database.updateSolarcoasterStats("battery", Convert.ToString(value).Replace(",", "."));
             }
         }
 
@@ -147,18 +148,21 @@ namespace AttractieCommunicatie
         {
             decimal loss = 0m;
             decimal gain = ldrValue * .01m;
-            decimal batteryLevel = 0;
+            decimal batteryLevel = 0m;
 
             switch (Arduino.speed)
             {
+                case 0:
+                    loss = .0m;
+                    break;
                 case 1:
-                    loss = .00m;
+                    loss = .3m;
                     break;
                 case 2:
-                    loss = .4m;
+                    loss = .6m;
                     break;
                 case 3:
-                    loss = .8m;
+                    loss = 0.9m;
                     break;
                 case 4:
                     loss = 1.2m;
