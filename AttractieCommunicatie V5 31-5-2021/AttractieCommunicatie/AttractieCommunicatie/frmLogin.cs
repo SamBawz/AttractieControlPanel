@@ -43,5 +43,27 @@ namespace AttractieCommunicatie
             frmCtrl.Show();
             this.Hide();
         }
+
+        private void lblExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+
+        }
+
+        private void lblExit_MouseHover(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Hand;
+        }
+
+        private void lblExit_MouseLeave(object sender, EventArgs e)
+        {
+            Cursor = Cursors.Default;
+        }
+
+        private void pbQuickLogin_Click(object sender, EventArgs e)
+        {
+            //For when not wanting to type -only for devs-
+            openForm();
+        }
     }
 }

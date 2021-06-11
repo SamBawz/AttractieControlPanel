@@ -11,6 +11,7 @@ using System.IO.Ports;
 using System.Configuration;
 
 
+
 namespace AttractieCommunicatie
 {
     public partial class frmControlPanel : Form
@@ -30,18 +31,19 @@ namespace AttractieCommunicatie
             foreach (Control control in this.Controls)
             {
                 //Uitzonderingen
-                if (control == btnPower || control == btnTerug || control == cbPorts || control == lblUser) { }
+                if (control == btnPower || control == btnTerug || control == cbPorts || control == lblUser || control.Tag is "lblLabels") { }
                 else if (control.Enabled != Arduino.power)
                 {
                     control.Enabled = Arduino.power;
                 }
+
+        
             }
 
             //Update element values
             if (!Arduino.power)
             {
                 cbPorts.Enabled = true;
-                btnPower.BackColor = Color.Red;
 
                 pbPower.Value = 0;
                 lblPower.Text = "Power: 0";
@@ -49,7 +51,6 @@ namespace AttractieCommunicatie
                 trkbrSpeed.Value = 0;
                 lblSpeed.Text = "Snelheid: 0";
 
-                btnReverse.BackColor = Color.Gray;
 
                 pbBattery.Value = 0;
                 lblBattery.Text = "Batterij: 0";
@@ -60,7 +61,7 @@ namespace AttractieCommunicatie
             else if (Arduino.power)
             {
                 cbPorts.Enabled = false;
-                btnPower.BackColor = Color.Green;
+                btnPower.ForeColor = Color.FromArgb(50, 226, 178);
 
                 //Update de GUI
                 lblPower.Text = "Power: " + Arduino.ldrValue.ToString();
@@ -71,11 +72,11 @@ namespace AttractieCommunicatie
 
                 if (Arduino.reverse)
                 {
-                    btnReverse.BackColor = Color.Green;
+                    btnReverse.ForeColor = Color.FromArgb(50, 226, 178);
                 }
                 else
                 {
-                    btnReverse.BackColor = Color.Red;
+                    btnReverse.ForeColor = Color.Red;
                 }
 
                 lblBattery.Text = "Batterij: " + Convert.ToInt32(Arduino.battery).ToString();
@@ -156,6 +157,12 @@ namespace AttractieCommunicatie
         private void btnPower_Click(object sender, EventArgs e)
         {
             Arduino.togglePower();
+            lblPower.Enabled = true;
+            lblBattery.Enabled = true;
+            lblSpeed.Enabled = true;
+            lblPower.ForeColor = Color.FromArgb(50, 226, 178);
+            lblSpeed.ForeColor = Color.FromArgb(50, 226, 178);
+            lblBattery.ForeColor = Color.FromArgb(50, 226, 178);
         }
     
         private void trkbrSpeed_Scroll(object sender, EventArgs e)
@@ -165,28 +172,32 @@ namespace AttractieCommunicatie
             if (trkbrSpeed.Value == 2)
             {
                 Sound.aSnel();
+                lblMessage.Text = "Snel!";
             }
             else if (trkbrSpeed.Value == 3)
             {
                 Sound.aSneller();
+                lblMessage.Text = "Sneller!";
             }
             else if (trkbrSpeed.Value == 4)
             {
                 Sound.aTurbo();
+                lblMessage.Text = "Turbo!";
             }
         }
 
         private void btnReverse_Click(object sender, EventArgs e)
         {
             Sound.aDraaien();
+            lblMessage.Text = "Draaien!";
 
             if (Arduino.reverseAttraction())
             {
-                btnReverse.BackColor = Color.Green;
+                btnReverse.ForeColor = Color.FromArgb(50, 226, 178);
             }
             else
             {
-                btnReverse.BackColor = Color.Red;
+                btnReverse.ForeColor = Color.Red;
             }
         }
         #endregion
@@ -195,11 +206,16 @@ namespace AttractieCommunicatie
         private void btnStart_Click(object sender, EventArgs e)
         {
             Sound.aStart();
+            Sound a = new Sound();
+
+            lblMessage.Visible = true;
+            lblMessage.Text = a.ToString();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             Sound.aStopAll();
+            lblMessage.Text = "Stopped!";
         }
         #endregion
 

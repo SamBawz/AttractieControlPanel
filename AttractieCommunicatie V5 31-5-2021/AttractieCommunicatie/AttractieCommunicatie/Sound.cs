@@ -27,16 +27,6 @@ namespace AttractieCommunicatie
             new System.Media.SoundPlayer(ConfigurationSettings.AppSettings["Draaien"]),
         };
 
-
-        public Sound(string _start, string _snel, string _sneller, string _turbo, string _draaien)
-        {
-            this.Start = _start;
-            this.Snel = _snel;
-            this.Sneller = _sneller;
-            this.Turbo = _turbo;
-            this.Draaien = _draaien;
-        }
-
         public static bool aStart()
         {
             foreach (System.Media.SoundPlayer sound in sounds)
@@ -103,6 +93,11 @@ namespace AttractieCommunicatie
             {
                 sound.Stop();
             }
+        }
+
+        public override string ToString()
+        {
+            return "Started!" + this.Start;
         }
     }
 }
