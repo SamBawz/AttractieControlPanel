@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
 using System.Configuration;
+using System.Runtime.InteropServices;
 
 
 
@@ -17,6 +18,14 @@ namespace AttractieCommunicatie
     public partial class frmControlPanel : Form
     {
         bool recieveSignals = false;
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        [DllImportAttribute("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd,
+                 int Msg, int wParam, int lParam);
+        [DllImportAttribute("user32.dll")]
+        public static extern bool ReleaseCapture();
 
         [Obsolete]
         public frmControlPanel()
@@ -31,7 +40,7 @@ namespace AttractieCommunicatie
             foreach (Control control in this.Controls)
             {
                 //Uitzonderingen
-                if (control == btnPower || control == btnTerug || control == cbPorts || control == lblUser || control.Tag is "lblLabels") { }
+                if (control == btnPower || control == btnTerug || control == cbPorts || control == lblUser || control.Tag is "lblLabels" || control == btnReturn) { }
                 else if (control.Enabled != Arduino.power)
                 {
                     control.Enabled = Arduino.power;
@@ -160,9 +169,7 @@ namespace AttractieCommunicatie
             lblPower.Enabled = true;
             lblBattery.Enabled = true;
             lblSpeed.Enabled = true;
-            lblPower.ForeColor = Color.FromArgb(50, 226, 178);
-            lblSpeed.ForeColor = Color.FromArgb(50, 226, 178);
-            lblBattery.ForeColor = Color.FromArgb(50, 226, 178);
+
         }
     
         private void trkbrSpeed_Scroll(object sender, EventArgs e)
@@ -219,10 +226,19 @@ namespace AttractieCommunicatie
         }
         #endregion
 
-        private void btnTerug_Click(object sender, EventArgs e)
+        private void btnReturn_Click(object sender, EventArgs e)
         {
             Arduino.power = false;
             this.Close();
+        }
+
+        private void frmControlPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
         }
     }
 }

@@ -64,6 +64,7 @@
             this.stSnelheid = new System.Windows.Forms.Label();
             this.btnReverse = new System.Windows.Forms.Button();
             this.btnPower = new System.Windows.Forms.Button();
+            this.btnReturn = new System.Windows.Forms.Button();
             this.grpbxSoundboard.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -141,7 +142,6 @@
             this.grpbxSoundboard.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.grpbxSoundboard.Controls.Add(this.btnStop);
             this.grpbxSoundboard.Controls.Add(this.btnStart);
-            this.grpbxSoundboard.Enabled = false;
             this.grpbxSoundboard.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.grpbxSoundboard.Location = new System.Drawing.Point(249, 360);
             this.grpbxSoundboard.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -162,7 +162,6 @@
             this.btnTerug.TabIndex = 16;
             this.btnTerug.Text = "Loguit";
             this.btnTerug.UseVisualStyleBackColor = true;
-            this.btnTerug.Click += new System.EventHandler(this.btnTerug_Click);
             // 
             // pbBattery
             // 
@@ -471,12 +470,26 @@
             this.btnPower.UseVisualStyleBackColor = false;
             this.btnPower.Click += new System.EventHandler(this.btnPower_Click);
             // 
+            // btnReturn
+            // 
+            this.btnReturn.FlatAppearance.BorderSize = 0;
+            this.btnReturn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReturn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.btnReturn.Location = new System.Drawing.Point(1106, 26);
+            this.btnReturn.Name = "btnReturn";
+            this.btnReturn.Size = new System.Drawing.Size(33, 31);
+            this.btnReturn.TabIndex = 27;
+            this.btnReturn.Text = "X";
+            this.btnReturn.UseVisualStyleBackColor = true;
+            this.btnReturn.Click += new System.EventHandler(this.btnReturn_Click);
+            // 
             // frmControlPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(51)))), ((int)(((byte)(73)))));
             this.ClientSize = new System.Drawing.Size(1196, 593);
+            this.Controls.Add(this.btnReturn);
             this.Controls.Add(this.tltPower);
             this.Controls.Add(this.stPower);
             this.Controls.Add(this.btnReverse);
@@ -505,11 +518,12 @@
             this.Controls.Add(this.btnTerug);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.ForeColor = System.Drawing.Color.White;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "frmControlPanel";
             this.Text = "Control Panel";
             this.Load += new System.EventHandler(this.frmControlPanel_Load);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.frmControlPanel_MouseDown);
             this.grpbxSoundboard.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -555,6 +569,7 @@
         private System.Windows.Forms.TrackBar trkbrSpeed;
         private System.Windows.Forms.Label tltSnelheid;
         private System.Windows.Forms.Label stSnelheid;
+        private System.Windows.Forms.Button btnReturn;
     }
 }
 
