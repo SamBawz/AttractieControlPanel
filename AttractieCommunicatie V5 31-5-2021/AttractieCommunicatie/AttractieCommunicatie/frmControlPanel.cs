@@ -161,6 +161,13 @@ namespace AttractieCommunicatie
             {
                 recieveSignals = false;
             }
+
+            if (Communication.signalTimedOut)
+            {
+                Communication.signalTimedOut = false;
+                MessageBox.Show("Connection timed out");
+                Arduino.power = false;
+            }
         }
 
         private void btnPower_Click(object sender, EventArgs e)
